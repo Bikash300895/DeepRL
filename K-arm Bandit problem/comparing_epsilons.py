@@ -49,5 +49,24 @@ def run_experiment(m1, m2, m3, eps, N):
     
     return cumulative_average
     
+if __name__ == '__main__':
+    c_1 = run_experiment(1.0, 2.0, 3.0, 0.1, 100000)
+    c_05 = run_experiment(1.0, 2.0, 3.0, 0.05, 100000)
+    c_01 = run_experiment(1.0, 2.0, 3.0, 0.01, 100000)
     
+    # plot large scale data
+    plt.plot(c_1, label='epsilon = 0.1')
+    plt.plot(c_05, label='epsilon = 0.05')
+    plt.plot(c_01, label='epsilon = 0.01')
+    plt.legend()
+    plt.xscale('log')
+    plt.show()
+    
+    
+    # plot large scale data
+    plt.plot(c_1, label='epsilon = 0.1')
+    plt.plot(c_05, label='epsilon = 0.05')
+    plt.plot(c_01, label='epsilon = 0.01')
+    plt.legend()
+    plt.show()
     
