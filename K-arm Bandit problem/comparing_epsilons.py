@@ -33,3 +33,21 @@ def run_experiment(m1, m2, m3, eps, N):
         # for the plot
         data[i] = x
     cumulative_average = np.cumsum(data) / (np.arange(N) + 1)
+    
+    # plot the moving average ctr
+    plt.plot(cumulative_average)
+    plt.plot(np.ones(N)*m1)
+    plt.plot(np.ones(N)*m2)
+    plt.plot(np.ones(N)*m3)
+    plt.xscale('log')
+    plt.show()
+    
+    
+    # debug print
+    for b in bandits:
+        print(b.mean)
+    
+    return cumulative_average
+    
+    
+    
