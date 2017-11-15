@@ -24,7 +24,7 @@ def print_poicy(P, g):
         print("\n-------------------------")
         for j in range(g.height):
             a = P.get((i, j), ' ')
-            print("  %s  |" %a)
+            print("  %s  |" %a, end=" ")
 
 
 if __name__ == '__main__':
@@ -70,5 +70,53 @@ if __name__ == '__main__':
                 biggest_chage = max(biggest_chage, np.abs(old_v - V[s]))
         if biggest_chage < SMALL_ENOUGH:
             break
-    print("Values for uniformly random actions: ")
+    print("\nValues for uniformly random actions: ")
+    print_values(V, grid)
+
+
+    """Fixed policy"""
+    policy = {
+        (2,0): 'U',
+        (1,0): 'U',
+        (0,0): 'R',
+        (0,1): 'R',
+        (0,2): 'R',
+        (1,2): 'R',
+        (2,1): 'R',
+        (2,2): 'R',
+        (2,3): 'U',
+    }
+    print_poicy(policy, grid)
+
+    # initialize V(s) = 0
+    V = {}
+    for s in states:
+        V[s] = 0
+
+    # discount factor
+    gamma = 0.9
+
+    # reapeat until convergence
+    while True:
+        biggest_chage = 0
+
+        for s in states:
+            old_v = V[s]
+
+            # V(s) only has values if it's not terminal states
+            if s in policy:
+                a = policy[s]
+                grid.set_state(s)
+                r = grid.move(a)
+
+                # calculate the new value (the heart of the algorithm)
+                V[s] = (r + gamma * V[grid.current_state()])
+                biggest_chage = max(biggest_chage, np.abs(old_v - V[s]))
+            # devug printing
+            print("\n\n\nApplying next policy")
+            print_values(V, grid)
+
+        if biggest_chage < SMALL_ENOUGH:
+            break
+    print("\nValues for uniformly random actions: ")
     print_values(V, grid)
