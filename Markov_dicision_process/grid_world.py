@@ -1,9 +1,9 @@
-# author: @bikash.shuvendu
+# author: @ShuvenduBikash
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" >> Defining the class """"
+# Defining the class
 class Grid:
     def __init__(self, width, height, start):
         self.width = width
@@ -53,26 +53,26 @@ class Grid:
         return (self.i, self.j) not in self.actions
 
     def all_states(self):
-        return set(self.action.keys() + self.rewards.keys())
+        return set(list(self.actions.keys()) + list(self.rewards.keys()))
 
-    def standard_grid():
-        # define a grid that desctibes the reward for arriving at each set_state
-        # the possible action at each set_state
-        g = Grid()
-        rewards = {(0,3): 1, (1,3): -1}     # simulating the most common grid with +1 at top most corner and -1 just bottom of it
-        actions = {
-            (0, 0): ('D', 'R'),
-            (0, 1): ('L', 'R'),
-            (0, 2): ('L', 'D', 'R'),
-            (1, 0): ('U', 'D'),
-            (1, 2): ('U', 'D', 'R'),
-            (2, 0): ('U', 'R'),
-            (2, 1): ('L', 'R'),
-            (2, 2): ('L', 'R', 'U'),
-            (2, 3): ('L', 'U'),
-        }
-        g.set(rewards, actions)
-        return g
+def standard_grid():
+    # define a grid that desctibes the reward for arriving at each set_state
+    # the possible action at each set_state
+    g = Grid(3, 4, (0, 0))
+    rewards = {(0,3): 1, (1,3): -1}     # simulating the most common grid with +1 at top most corner and -1 just bottom of it
+    actions = {
+        (0, 0): ('D', 'R'),
+        (0, 1): ('L', 'R'),
+        (0, 2): ('L', 'D', 'R'),
+        (1, 0): ('U', 'D'),
+        (1, 2): ('U', 'D', 'R'),
+        (2, 0): ('U', 'R'),
+        (2, 1): ('L', 'R'),
+        (2, 2): ('L', 'R', 'U'),
+        (2, 3): ('L', 'U'),
+    }
+    g.set(rewards, actions)
+    return g
 
-    def play_game(agent, env):
-        pass
+def play_game(agent, env):
+    pass
