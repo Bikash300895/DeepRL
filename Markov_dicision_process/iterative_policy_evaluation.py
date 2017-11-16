@@ -65,6 +65,7 @@ if __name__ == '__main__':
                     r = grid.move(a)
 
                     # calculate the new value (the heart of the algorithm)
+                    # Equation 4.4
                     new_v += p_a * (r + gamma * V[grid.current_state()])
                 V[s] = new_v
                 biggest_chage = max(biggest_chage, np.abs(old_v - V[s]))
