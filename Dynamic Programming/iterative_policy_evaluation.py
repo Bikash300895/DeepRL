@@ -7,6 +7,7 @@ from grid_world import standard_grid
 # threshold convergence
 SMALL_ENOUGH = 10e-4
 
+
 # helper function for visualization the training
 def print_values(V, g):
     for i in range(g.width):
@@ -14,17 +15,18 @@ def print_values(V, g):
         for j in range(g.height):
             v = V.get((i, j), 0)
 
-            if v>=0:
-                print(" %.2f" %v, end=" ")
+            if v >= 0:
+                print(" %.2f" % v, end=" ")
             else:
-                print("%.2f" %v, end=" ") # -ve sign takes an extra space
+                print("%.2f" % v, end=" ")  # -ve sign takes an extra space
+
 
 def print_poicy(P, g):
     for i in range(g.width):
         print("\n-------------------------")
         for j in range(g.height):
             a = P.get((i, j), ' ')
-            print("  %s  |" %a, end=" ")
+            print("  %s  |" % a, end=" ")
 
 
 if __name__ == '__main__':
@@ -74,18 +76,17 @@ if __name__ == '__main__':
     print("\nValues for uniformly random actions: ")
     print_values(V, grid)
 
-
     """Fixed policy"""
     policy = {
-        (2,0): 'U',
-        (1,0): 'U',
-        (0,0): 'R',
-        (0,1): 'R',
-        (0,2): 'R',
-        (1,2): 'R',
-        (2,1): 'R',
-        (2,2): 'R',
-        (2,3): 'U',
+        (2, 0): 'U',
+        (1, 0): 'U',
+        (0, 0): 'R',
+        (0, 1): 'R',
+        (0, 2): 'R',
+        (1, 2): 'R',
+        (2, 1): 'R',
+        (2, 2): 'R',
+        (2, 3): 'U',
     }
     print_poicy(policy, grid)
 

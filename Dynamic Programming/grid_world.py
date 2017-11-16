@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Defining the class
 class Grid:
     def __init__(self, width, height, start):
@@ -28,26 +29,26 @@ class Grid:
         # check if legal move first
         if action in self.actions[(self.i, self.j)]:
             if action == 'U':
-                self.i -=1
+                self.i -= 1
             elif action == 'D':
-                self.i +=1
+                self.i += 1
             elif action == 'R':
-                self.j +=1
+                self.j += 1
             elif action == 'L':
-                self.j -=1
+                self.j -= 1
         # return a reward if any
         return self.rewards.get((self.i, self.j), 0)
 
     def undo_move(self, action):
         if action == 'U':
-            self.i +=1
+            self.i += 1
         elif action == 'D':
-            self.i -=1
+            self.i -= 1
         elif action == 'R':
-            self.j -=1
+            self.j -= 1
         elif action == 'L':
-            self.j +=1
-        assert(self.current_state() in self.all_stated())
+            self.j += 1
+        assert (self.current_state() in self.all_stated())
 
     def game_over(self):
         return (self.i, self.j) not in self.actions
@@ -55,11 +56,13 @@ class Grid:
     def all_states(self):
         return set(list(self.actions.keys()) + list(self.rewards.keys()))
 
+
 def standard_grid():
     # define a grid that desctibes the reward for arriving at each set_state
     # the possible action at each set_state
     g = Grid(3, 4, (0, 0))
-    rewards = {(0,3): 1, (1,3): -1}     # simulating the most common grid with +1 at top most corner and -1 just bottom of it
+    rewards = {(0, 3): 1,
+               (1, 3): -1}  # simulating the most common grid with +1 at top most corner and -1 just bottom of it
     actions = {
         (0, 0): ('D', 'R'),
         (0, 1): ('L', 'R'),
@@ -74,22 +77,24 @@ def standard_grid():
     g.set(rewards, actions)
     return g
 
+
 def negative_grid(step_cost=-0.1):
-  # in this game we want to try to minimize the number of moves
-  # so we will penalize every move
-  g = standard_grid()
-  g.rewards.update({
-    (0, 0): step_cost,
-    (0, 1): step_cost,
-    (0, 2): step_cost,
-    (1, 0): step_cost,
-    (1, 2): step_cost,
-    (2, 0): step_cost,
-    (2, 1): step_cost,
-    (2, 2): step_cost,
-    (2, 3): step_cost,
-  })
-  return g
+    # in this game we want to try to minimize the number of moves
+    # so we will penalize every move
+    g = standard_grid()
+    g.rewards.update({
+        (0, 0): step_cost,
+        (0, 1): step_cost,
+        (0, 2): step_cost,
+        (1, 0): step_cost,
+        (1, 2): step_cost,
+        (2, 0): step_cost,
+        (2, 1): step_cost,
+        (2, 2): step_cost,
+        (2, 3): step_cost,
+    })
+    return g
+
 
 def play_game(agent, env):
     pass
