@@ -1,7 +1,7 @@
 # Author: @ShuvenduBikash
 
 import numpy as np
-from grid_world import standard_grid, print_values, print_poicy
+from grid_world import standard_grid, print_values, print_policy
 
 SMALL_ENOUGH = 1e-3
 GAMMA = 0.9
@@ -94,4 +94,4 @@ if __name__ == '__main__':
     print("values:")
     print_values(V, grid)
     print("policy:")
-    print_poicy(policy, grid)
+    print_policy(policy, grid)

@@ -109,7 +109,7 @@ def print_values(V, g):
                 print("%.2f" % v, end=" ")  # -ve sign takes an extra space
 
 
-def print_poicy(P, g):
+def print_policy(P, g):
     for i in range(g.width):
         print("\n-------------------------")
         for j in range(g.height):
