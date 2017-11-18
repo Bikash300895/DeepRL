@@ -1,7 +1,7 @@
 import numpy as np
 from grid_world import *
 
-GAMMA = 1e-3
+GAMMA = 0.9
 ALL_POSSIBLE_ACTIONS = ['U', 'D', 'L', 'R']
 
 def max_dict(d):
