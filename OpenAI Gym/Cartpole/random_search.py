@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 def get_action(s, w):
     return 1 if s.dot(w) > 0 else 0
 
-def play_one_episode(env, params):
+def play_one_episode(env, params, render=False):
     observation = env.reset()
     done = False
     t = 0
     
     while not done and t<10000:
-        # env.render()
+        if render:
+            env.render()
         t += 1
         
         action = get_action(observation, params)
@@ -20,4 +21,35 @@ def play_one_episode(env, params):
             break
     return t
 
+def play_multiple_episodes(env, T, params, render = False):
+    episode_length = np.empty(T)
+    
+    for i in range(T):
+        episode_length[i] = play_one_episode(env, params, render)
+        
+    avg_length = episode_length.mean()
+    return avg_length
 
+def random_search(env):
+    episode_lengths = []
+    best = 0
+    params = None
+    for t in range(100):
+        new_params = np.random.random(4)*2 -1
+        avg_length = play_multiple_episodes(env, 100, new_params)
+        episode_lengths.append(avg_length)
+        
+        if avg_length > best:
+            best = avg_length
+            params = new_params
+            
+    return episode_lengths, params
+
+if __name__ == '__main__':
+    env = gym.make('CartPole-v0')
+    episode_lengths, params = random_search(env)
+    plt.plot(episode_lengths)
+    plt.show()
+    
+    print("Final run with best parameters")
+    play_multiple_episodes(env, 1, params, render = True)
