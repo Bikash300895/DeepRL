@@ -17,3 +17,4 @@ while not done:
     observation, reward, done, _ = env.step(env.action_space.sample())
     
 print(counter)
+
