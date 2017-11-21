@@ -4,3 +4,4 @@ data/
 dataset/
 .idea/
 *.npy
+log/
