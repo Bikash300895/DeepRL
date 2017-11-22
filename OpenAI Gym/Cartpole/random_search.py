@@ -1,7 +1,7 @@
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
-
+from gym import wrappers
 env = gym.make('CartPole-v0')
 
 
@@ -57,5 +57,6 @@ if __name__ == '__main__':
     plt.plot(episode_lengths)
     plt.show()
 
+    env = wrappers.Monitor(env, 'my_awesome_dir')
     print("Final run with best parameters")
     play_multiple_episode(10, params, True)
