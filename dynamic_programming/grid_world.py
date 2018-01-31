@@ -62,7 +62,7 @@ class Grid:
         return (self.i, self.j) not in self.actions
 
     def all_states(self):
-        return set(self.actions.keys() + self.rewards.keys())
+        return set(list(self.actions.keys()) + list(self.rewards.keys()))
 
 
 def standard_grid():
