@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -35,3 +37,25 @@ class ReplyMemory(object):
     def __init__(self, capacity):
         self.capacity = capacity
         self.memory = []
+
+    def push(self, event):
+        """
+        :param event: tuple (state, next_state, action, reward)
+        :return: None
+        """
+        self.memory.append(event)
+        if len(self.memory) > self.capacity:
+            del self.memory[0]
+
+    def sample(self, batch_size):
+        """
+        samples from the stored data
+        :param batch_size: size of batch
+        :return: a batch of data
+        """
+        samples = zip(*random.sample(self.memory, batch_size))
+        return map(lambda x: Variable(torch.cat(x, 0)), samples)
+
+        # samples = zip(*random.sample(memory, batch_size))
+        # samples = map(lambda x: Variable(torch.from_numpy(np.array(x))), samples)
+        # print(list(samples))
