@@ -11,7 +11,7 @@ def print_values(V, g):
         for j in range(g.height):
             v = V.get((i, j), 0)
             if v >= 0:
-                print(" %.2f|" % v, end="")
+                print("  %.2f|" % v, end="")
             else:
                 print(" %.2f|" % v, end="")  # -ve take an extra space
         print()
@@ -64,3 +64,13 @@ if __name__ == '__main__':
 
     print('values for uniform search')
     print_values(V, grid)
+
+    """
+    values for uniform search
+    ----------------------------
+     -0.03|  0.09|  0.22|  0.00|
+    ----------------------------
+     -0.16|  0.00| -0.44|  0.00|
+    ----------------------------
+     -0.29| -0.41| -0.54| -0.77|
+    """
