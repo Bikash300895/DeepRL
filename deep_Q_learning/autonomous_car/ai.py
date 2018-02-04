@@ -59,3 +59,21 @@ class ReplyMemory(object):
         # samples = zip(*random.sample(memory, batch_size))
         # samples = map(lambda x: Variable(torch.from_numpy(np.array(x))), samples)
         # print(list(samples))
+
+
+# Deep Q learning
+class Dqn:
+    def __init__(self, input_size, nb_actions, gamma):
+        self.gamma = gamma
+        self.reward_window = []
+        self.model = Network(input_size, nb_actions)
+        self.memory = ReplyMemory(100000)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        self.last_state = torch.Tensor(input_size).unsqueeze(0)  # one extra dimension for batch
+        self.last_action = 0
+        self.last_reward = 0
+
+    def select_action(self, state):
+        probs = F.softmax(self.model(Variable(state, volatile=True)) * 7)  # temperature = 7; it will increase the probability of high prob higher
+        action = probs.multinomial()
+        return action.data[0, 0]
