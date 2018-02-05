@@ -1,59 +1,49 @@
-# -*- coding: utf-8 -*-
+import numpy as np
+import keras
 import random
 import gym
-import numpy as np
+from keras import layers, models
 from collections import deque
-from keras.models import Sequential
-from keras import layers
-from keras.optimizers import Adam
-from keras import backend as K
-
-eposodes = 5000
 
 
-class DQNagent:
-    """
-    Model for playing with Deep Q learning
-    """
+class DQNAgent:
     def __init__(self, state_size, action_size):
-        """
-        Arguments:
-            state_size: 
-                input size to the network, indicating state 
-            action_size:
-                possible actions
-                (for CartPole-v0 it has two actions 0/1)
-        """
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)  # store prev states
-        self.gamma = 0.95  # discount rate
-        self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01
-        self.epsilon_decay = 0.99
         self.learning_rate = 0.001
         self.model = self._build_model()
+        self.memory = deque(maxlen=2000)
+        self.gamma = 0.95  # discount factro
+        self.epsilon = 1.0  # exploration rate
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.995
         
-        
+    
     def _build_model(self):
-        # Build the neural network 
-        model = Sequential()
-        model.add(layers.Dense(24, input_dim = self.state_size, activation='relu'))
+        model = models.Sequential()
+        model.add(layers.Dense(24, input_dim=self.state_size, activation='relu'))
         model.add(layers.Dense(24, activation='relu'))
         model.add(layers.Dense(self.action_size, activation='linear'))
         
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+        model.compile(loss='mse', optimizer=keras.optimizers.Adam(lr=self.learning_rate))
+        model.summary()
+        
         return model
     
     def remember(self, state, action, reward, next_state, done):
-        # Store outputs in memory for use in future training
-        self.memory.append((state, ation, reward, next_state, done))
+        self.memory.append((state, action, reward, next_state, done))
         
+    def act(self, state):
+        if np.random.rand() <= self.epsilon:
+            return random.randrange(self.action_size)
+        act_values = self.model.predict(state)
+        return np.argmax(act_values[0])  # First dimension is the batch dim
+
+
+if __name__ == '__main__':
+    env = gym.make('CartPole-v1')
+    state_size = env.observation_space.shape[0]  # 4
+    action_size = env.action_space.n  # 2
+    agent = DQNAgent(state_size, action_size)
     
-        
-        
-        
-        
-        
-            
-                
+    
