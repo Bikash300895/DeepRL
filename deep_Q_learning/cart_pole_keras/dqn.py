@@ -49,8 +49,8 @@ class DQNAgent:
             if not done:
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
                 
-            target_f = self.model.predict(state)  # it will the the output of the model, but we know one (action, reward) pair
-            target_f[0][action] = target  # 0 for batch dim, action is the known action. updating the return for that action
+            target_f = self.model.predict(state)  # it will be the output of the model, but we know one (action, reward) pair of the output
+            target_f[0][action] = target  # 0 for batch dim, action is the known action. update the return for that action, this is where the learning will happen
             
             self.model.fit(state, target_f, epochs = 1, verbose=0)
         
