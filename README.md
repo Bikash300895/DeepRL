@@ -13,3 +13,4 @@ Implementation for Reinforcement learning algorithm
 # Deep Reinforcement learning
 ### [Deep Q learning](deep_Q_learning)
 - [Autonomous car](deep_Q_learning/autonomous_car)
+- [Cart pole](deep_Q_learning/cart_pole_keras)
