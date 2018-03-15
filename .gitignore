@@ -6,3 +6,4 @@ dataset/
 *.npy
 log/
 OpenAI Gym/Cartpole/my_awesome_dir/
+venv/

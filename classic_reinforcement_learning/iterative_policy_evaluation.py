@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from grid_world import standard_grid
+from .grid_world import standard_grid
 
 small_enough = 1e-3  # threshold for convergence
 

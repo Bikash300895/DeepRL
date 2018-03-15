@@ -3,8 +3,8 @@
 Implementation for Reinforcement learning algorithm
 
 
-### [Dynamic programming](dynamic_programming)
-- [Iterative policy evaluation](dynamic_programming/iterative_policy_evaluation.py)
+### [Dynamic programming](classic_reinforcement_learning)
+- [Iterative policy evaluation](classic_reinforcement_learning/iterative_policy_evaluation.py)
 
 
 # Deep Reinforcement learning
