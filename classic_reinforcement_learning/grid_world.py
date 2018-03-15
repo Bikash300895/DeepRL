@@ -4,6 +4,15 @@ import matplotlib.pyplot as plt
 
 # Environment class
 class Grid:
+    """
+    Contain the grid world environment
+    :param
+    width
+    height
+    (i, j) : location
+    rewards: dictionary
+    actions: dictionary
+    """
     def __init__(self, width, height, start):
         self.width = width
         self.height = height
