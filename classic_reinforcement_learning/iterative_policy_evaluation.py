@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 
 def print_values(V, g):
+    print("\nValues: ")
     for i in range(g.width):
         print("---------------------------")
         for j in range(g.height):
@@ -27,6 +28,7 @@ def print_values(V, g):
 
 
 def print_policy(P, g):
+    print("\nPolicy: ")
     for i in range(g.width):
         print("---------------------------")
         for j in range(g.height):
