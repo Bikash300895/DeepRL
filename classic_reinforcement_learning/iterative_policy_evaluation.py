@@ -66,3 +66,39 @@ if __name__ == '__main__':
     print("Values for uniformly random actions: ")
     print_values(V, grid)
 
+    ### fixed policy ###
+    policy = {
+        (2, 0): 'U',
+        (1, 0): 'U',
+        (0, 0): 'R',
+        (0, 1): 'R',
+        (0, 2): 'R',
+        (1, 2): 'R',
+        (2, 1): 'R',
+        (2, 2): 'R',
+        (2, 3): 'U',
+    }
+    print_policy(policy, grid)
+
+    # initialize V(s)
+    V = {}
+    for s in states:
+        V[s] = 0
+    gamma = 0.9
+
+    while True:
+        biggest_change = 0
+        for s in states:
+            if s in policy:
+                old_v = V[s]
+
+                grid.set_state(s)
+                r = grid.move(policy[s])
+
+                V[s] = r + gamma * V[grid.current_state()]
+                biggest_change = np.abs(old_v - V[s])
+
+        if biggest_change < small_enough:
+            break
+
+    print_values(V, grid)
