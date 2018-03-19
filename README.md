@@ -10,7 +10,8 @@ Implementation for Reinforcement learning algorithm
 
 ### Monte carlo
 - [Policy evaluation](classic_reinforcement_learning/monte_carlo.py)
-- [Policy iteration](classic_reinforcement_learning/monte_carlo_es.py)
+- [Policy iteration - Epsilon greedy](classic_reinforcement_learning/monte_carlo_es.py)
+- [Policy iteration - no ES (epsilon soft)](classic_reinforcement_learning/monte_carlo_no_es.py)
 
 # Deep Reinforcement learning
 ### [Deep Q learning](deep_Q_learning)
