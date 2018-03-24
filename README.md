@@ -18,7 +18,7 @@ Implementation for Reinforcement learning algorithm
 
 # Deep Reinforcement learning
 ### [Policy Gradient](policy_gradient)
-- [Policy gradient - CartPole]()
+- [Policy gradient - CartPole](policy_gradient/policy_gradient_tf.py)
 
 ### [Deep Q learning](deep_Q_learning)
 - [Autonomous car](deep_Q_learning/autonomous_car)
