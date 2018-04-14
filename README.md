@@ -17,6 +17,9 @@ Implementation for Reinforcement learning algorithm
 - [n-step](td_lambda/n_step.py)
 
 # Deep Reinforcement learning
+### Intro
+- [Familiarization with Gym env](OpenAI%20Gym)
+
 ### [Policy Gradient](policy_gradient)
 - [Policy gradient - CartPole](policy_gradient/policy_gradient_tf.py)
 
