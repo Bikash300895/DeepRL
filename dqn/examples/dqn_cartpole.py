@@ -26,3 +26,8 @@ model.add(Dense(nb_actions))
 model.add(Activation('linear'))
 print(model.summary())
 
+from dqn.utils.memory import SequentialMemory
+memory = SequentialMemory(limit=50000, window_length=1)
+
+from dqn.utils.policy import BoltzmannQPolicy
+policy = BoltzmannQPolicy()
