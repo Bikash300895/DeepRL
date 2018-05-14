@@ -93,11 +93,14 @@ if __name__ == '__main__':
         agent.model.load_weights('policy_gradient\\save_model\\pong_reinforce.h5')
         print("model weights loaded")
     except:
-        pass
+        try:
+            agent.model.load_weights('save_model\\pong_reinforce.h5')
+        except Exception as e:
+            print("Sorry!!! model weights not loaded")
 
     while True:
-        # time.sleep(.01)
-        # env.render(mode='human')
+        time.sleep(.01)
+        env.render(mode='human')
         cur_x = preprocess(state)
         x = cur_x - prev_x if prev_x is not None else np.zeros(state_size)
         prev_x = cur_x
