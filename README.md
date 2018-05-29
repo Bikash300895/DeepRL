@@ -20,7 +20,6 @@ Implementation for Reinforcement learning algorithm
 
 ### [Deep Q learning](q_learning)
 - [DQN](q_learning/1.dqn)
-- [Cart pole](deep_Q_learning/cart_pole_keras)
 
 
 ### Policy Gradient
