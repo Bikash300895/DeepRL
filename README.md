@@ -17,12 +17,12 @@ Implementation for Reinforcement learning algorithm
 - [n-step](td_lambda/n_step.py)
 
 # Deep Reinforcement learning
-### Intro
-- [Familiarization with Gym env](OpenAI%20Gym)
+
+### [Deep Q learning](q_learning)
+- [Autonomous car](deep_Q_learning/autonomous_car)
+- [Cart pole](deep_Q_learning/cart_pole_keras)
+
 
 ### Policy Gradient
 - CartPole [Tensorflow](policy_gradient/policy_gradient_tf.py), [Keras](policy_gradient/cart-pole%20keras.py)
 
-### [Deep Q learning](deep_Q_learning)
-- [Autonomous car](deep_Q_learning/autonomous_car)
-- [Cart pole](deep_Q_learning/cart_pole_keras)
