@@ -108,7 +108,6 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters())
     replay_buffer = ReplyBuffer(1000)
 
-
     # compute temporal difference loss
     def compute_td_loss(batch_size):
         state, action, reward, next_state, done = replay_buffer.sample(batch_size)

@@ -127,7 +127,6 @@ if __name__ == '__main__':
     replay_initial = 10000
     replay_buffer = ReplyBuffer(100000)
 
-
     # compute temporal difference loss
     def compute_td_loss(batch_size):
         state, action, reward, next_state, done = replay_buffer.sample(batch_size)
@@ -160,7 +159,6 @@ if __name__ == '__main__':
     # train the model
     episode = 0
     for frame_idx in range(1, num_frames + 1):
-        print('frame', frame_idx)
         epsilon = epsilon_by_frame(frame_idx)
         action = model.act(state, epsilon)
 
