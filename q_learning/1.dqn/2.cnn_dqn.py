@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.autograd as autograd
 from IPython.display import clear_output
+from utils.wrappers import make_atari, wrap_deepmind, wrap_pytorch
 
 USE_CUDA = torch.cuda.is_available()
 Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() \
@@ -97,8 +98,13 @@ class CnnDQN(nn.Module):
 
 if __name__ == '__main__':
     env = gym.make('Pong-v0')
+    
+    env    = make_atari('Pong-v0')
+    env    = wrap_deepmind(env)
+    env    = wrap_pytorch(env)
+    
     state = env.reset()
-    state = np.rollaxis(state, 2, 0)
+    # state = np.rollaxis(state, 2, 0)
 
     # epsilon greedy exploration parameters
     epsilon_start = 1.0
@@ -117,7 +123,7 @@ if __name__ == '__main__':
 
     # define model
     shape = env.observation_space.shape
-    model = CnnDQN((shape[2], shape[0], shape[1]), env.action_space.n)
+    model = CnnDQN(shape, env.action_space.n)
 
     if USE_CUDA:
         model = model.cuda()
@@ -163,7 +169,7 @@ if __name__ == '__main__':
         action = model.act(state, epsilon)
 
         next_state, reward, done, _ = env.step(action)
-        next_state = np.rollaxis(next_state, 2, 0)
+        # next_state = np.rollaxis(next_state, 2, 0)
 
         replay_buffer.push(state, action, reward, next_state, done)
 
