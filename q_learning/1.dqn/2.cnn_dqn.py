@@ -3,6 +3,7 @@ import random
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -36,17 +37,24 @@ from collections import deque
 class ReplyBuffer(object):
     def __init__(self, capacity):
         """stores (state, action, reward, next_state, done) in a buffer"""
-        self.buffer = deque(maxlen=capacity)
+        self.buffer = deque(maxlen=capacity)                                   # (state, action, reward, next_state, done)  -> tuple
 
     def push(self, state, action, reward, next_state, done):
-        state = np.expand_dims(state, 0)  # insert a batch_dim
-        next_state = np.expand_dims(next_state, 0)
+        """
+        state        ->   (1, 80, 80)
+        action       ->   int
+        reward       ->   float
+        next_state   ->   (1, 80, 80)
+        done         ->   bool
+        """
+        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 1, 80, 80)
+        next_state = np.expand_dims(next_state, 0)                             # (1, 1, 80, 80)
 
         self.buffer.append((state, action, reward, next_state, done))
 
     def sample(self, batch_size):
-        state, action, reward, next_state, done = zip(*random.sample(self.buffer, batch_size))
-        return np.concatenate(state), action, reward, np.concatenate(next_state), done
+        state, action, reward, next_state, done = zip(*random.sample(self.buffer, batch_size))     # all are (32) -> tuple
+        return np.concatenate(state), action, reward, np.concatenate(next_state), done             # state -> (32, 1, 80, 80)
 
     def __len__(self):
         return len(self.buffer)
@@ -85,26 +93,29 @@ class CnnDQN(nn.Module):
         return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
 
     def act(self, state, epsilon):
+        """
+        state -> (1, 80, 80)
+        
+        return action -> int
+        """
         if random.random() > epsilon:
             with torch.no_grad():
-                state = Variable(torch.FloatTensor(state).unsqueeze(0))
-            q_value = self.forward(state)
-            action = q_value.max(1)[1].item()
+                state = Variable(torch.FloatTensor(state).unsqueeze(0))        # (1, 1, 80, 80) -> numpy
+            q_value = self.forward(state)                                      # (1, 6)         -> torch.FloatTensor()
+            action = q_value.max(1)[1].item()                                  # max returns  (item, index)
         else:
             action = random.randrange(self.num_actions)
 
-        return action
+        return action                                                          # int
 
 
 if __name__ == '__main__':
-    env = gym.make('Pong-v0')
-    
     env    = make_atari('Pong-v0')
     env    = wrap_deepmind(env)
     env    = wrap_pytorch(env)
     
-    state = env.reset()
-    # state = np.rollaxis(state, 2, 0)
+    state = env.reset()  # (1, 80, 80)
+
 
     # epsilon greedy exploration parameters
     epsilon_start = 1.0
@@ -122,8 +133,7 @@ if __name__ == '__main__':
     episode_reward = 0
 
     # define model
-    shape = env.observation_space.shape
-    model = CnnDQN(shape, env.action_space.n)
+    model = CnnDQN(env.observation_space.shape, env.action_space.n)
 
     if USE_CUDA:
         model = model.cuda()
@@ -164,7 +174,7 @@ if __name__ == '__main__':
 
     # train the model
     episode = 0
-    for frame_idx in range(1, num_frames + 1):
+    for frame_idx in tqdm(range(1, num_frames + 1)):
         epsilon = epsilon_by_frame(frame_idx)
         action = model.act(state, epsilon)
 
@@ -177,7 +187,7 @@ if __name__ == '__main__':
         episode_reward += reward
 
         if done:
-            print('Episode : %d, Current reward: %d' % (episode, episode_reward))
+            print('\tEpisode : %d, Current reward: %d' % (episode, episode_reward))
             episode += 1
 
             state = env.reset()
