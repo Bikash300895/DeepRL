@@ -41,14 +41,14 @@ class ReplyBuffer(object):
 
     def push(self, state, action, reward, next_state, done):
         """
-        state        ->   (1, 80, 80)
+        state        ->   (4, 80, 80)
         action       ->   int
         reward       ->   float
-        next_state   ->   (1, 80, 80)
+        next_state   ->   (4, 80, 80)
         done         ->   bool
         """
-        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 1, 80, 80)
-        next_state = np.expand_dims(next_state, 0)                             # (1, 1, 80, 80)
+        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 4, 80, 80)
+        next_state = np.expand_dims(next_state, 0)                             # (1, 4, 80, 80)
 
         self.buffer.append((state, action, reward, next_state, done))
 
@@ -94,13 +94,13 @@ class CnnDQN(nn.Module):
 
     def act(self, state, epsilon):
         """
-        state -> (1, 80, 80)
+        state -> (4, 80, 80)
         
         return action -> int
         """
         if random.random() > epsilon:
             with torch.no_grad():
-                state = Variable(torch.FloatTensor(state).unsqueeze(0))        # (1, 1, 80, 80) -> numpy
+                state = Variable(torch.FloatTensor(state).unsqueeze(0))        # (1, 4, 80, 80) -> numpy
             q_value = self.forward(state)                                      # (1, 6)         -> torch.FloatTensor()
             action = q_value.max(1)[1].item()                                  # max returns  (item, index)
         else:
@@ -111,10 +111,10 @@ class CnnDQN(nn.Module):
 
 if __name__ == '__main__':
     env    = make_atari('Pong-v0')
-    env    = wrap_deepmind(env)
+    env    = wrap_deepmind(env, frame_stack=True)
     env    = wrap_pytorch(env)
     
-    state = env.reset()  # (1, 80, 80)
+    state = env.reset()  # (4, 80, 80)
 
 
     # epsilon greedy exploration parameters
@@ -179,7 +179,6 @@ if __name__ == '__main__':
         action = model.act(state, epsilon)
 
         next_state, reward, done, _ = env.step(action)
-        # next_state = np.rollaxis(next_state, 2, 0)
 
         replay_buffer.push(state, action, reward, next_state, done)
 
