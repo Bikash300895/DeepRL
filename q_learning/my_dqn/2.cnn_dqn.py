@@ -11,6 +11,7 @@ import torch.optim as optim
 import torch.autograd as autograd
 from IPython.display import clear_output
 from utils.wrappers import make_atari, wrap_deepmind, wrap_pytorch
+from utils.layers import Vgg16
 
 USE_CUDA = torch.cuda.is_available()
 Variable = lambda *args, **kwargs: autograd.Variable(*args, **kwargs).cuda() \
@@ -41,14 +42,14 @@ class ReplyBuffer(object):
 
     def push(self, state, action, reward, next_state, done):
         """
-        state        ->   (4, 80, 80)
+        state        ->   (256, 21, 21)
         action       ->   int
         reward       ->   float
-        next_state   ->   (4, 80, 80)
+        next_state   ->   (256, 21, 21)
         done         ->   bool
         """
-        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 4, 80, 80)
-        next_state = np.expand_dims(next_state, 0)                             # (1, 4, 80, 80)
+        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 256, 21, 21)
+        next_state = np.expand_dims(next_state, 0)                             # (1, 256, 21, 21)
 
         self.buffer.append((state, action, reward, next_state, done))
 
@@ -69,11 +70,9 @@ class CnnDQN(nn.Module):
         self.num_actions = num_actions
 
         self.features = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=5, stride=4),
+            nn.Conv2d(input_shape[0], 256, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
+            nn.Conv2d(256, 256, kernel_size=3, stride=2),
             nn.ReLU()
         )
 
@@ -111,10 +110,12 @@ class CnnDQN(nn.Module):
 
 if __name__ == '__main__':
     env    = make_atari('Pong-v0')
-    env    = wrap_deepmind(env, frame_stack=True)
+    env    = wrap_deepmind(env, frame_stack=True, scale=True)
     env    = wrap_pytorch(env)
     
-    state = env.reset()  # (4, 80, 80)
+    feature_extractor = Vgg16()
+    state = env.reset()  # (3, 84, 84)
+    state = feature_extractor(torch.FloatTensor(state)).squeeze(0).data.numpy()
 
 
     # epsilon greedy exploration parameters
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(
         -1. * frame_idx / epsilon_decay)
 
-    num_frames = 1400000
+    num_frames = 1000000
     batch_size = 32
     gamma = 0.99
 
@@ -133,16 +134,24 @@ if __name__ == '__main__':
     episode_reward = 0
 
     # define model
-    model = CnnDQN(env.observation_space.shape, env.action_space.n)
-
+    current_model = CnnDQN((256, 21, 21), env.action_space.n)
+    target_model = CnnDQN((256, 21, 21), env.action_space.n)
+    
     if USE_CUDA:
-        model = model.cuda()
+        current_model = current_model.cuda()
+        target_model = target_model.cuda()
 
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(current_model.parameters(), lr=0.0001)
 
     replay_initial = 10000
     replay_buffer = ReplyBuffer(100000)
 
+    
+    # function for synchoronize current net with target net
+    def update_target(current_model, target_model):
+        target_model.load_state_dict(current_model.state_dict())
+        
+        
     # compute temporal difference loss
     def compute_td_loss(batch_size):
         state, action, reward, next_state, done = replay_buffer.sample(batch_size)
@@ -156,11 +165,12 @@ if __name__ == '__main__':
         reward = Variable(torch.FloatTensor(reward))
         done = Variable(torch.FloatTensor(done))
 
-        q_values = model(state)
-        next_q_values = model(next_state)
+        q_values = current_model(state)
+        next_q_values = current_model(next_state)
+        next_q_state_values = target_model(next_state)
 
         q_value = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
-        next_q_value = next_q_values.max(1)[0]
+        next_q_value = next_q_state_values.gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1)).squeeze(1)
         expected_q_value = reward + gamma * next_q_value * (1 - done)
 
         loss = (q_value - Variable(expected_q_value.data)).pow(2).mean()
@@ -176,9 +186,10 @@ if __name__ == '__main__':
     episode = 0
     for frame_idx in tqdm(range(1, num_frames + 1)):
         epsilon = epsilon_by_frame(frame_idx)
-        action = model.act(state, epsilon)
+        action = current_model.act(state, epsilon)
 
         next_state, reward, done, _ = env.step(action)
+        next_state = feature_extractor(torch.FloatTensor(next_state)).squeeze(0).data.numpy()
 
         replay_buffer.push(state, action, reward, next_state, done)
 
@@ -197,7 +208,7 @@ if __name__ == '__main__':
             loss = compute_td_loss(batch_size)
             losses.append(loss.item())
 
-        if frame_idx % 200 == 0:
-            pass
+        if frame_idx % 1000 == 0:
+            update_target(current_model, target_model)
 
     plot(frame_idx, all_rewards, losses)

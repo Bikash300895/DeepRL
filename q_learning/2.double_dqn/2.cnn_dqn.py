@@ -41,20 +41,20 @@ class ReplyBuffer(object):
 
     def push(self, state, action, reward, next_state, done):
         """
-        state        ->   (4, 80, 80)
+        state        ->   (4, 84, 84)
         action       ->   int
         reward       ->   float
-        next_state   ->   (4, 80, 80)
+        next_state   ->   (4, 84, 84)
         done         ->   bool
         """
-        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 4, 80, 80)
-        next_state = np.expand_dims(next_state, 0)                             # (1, 4, 80, 80)
+        state = np.expand_dims(state, 0)  # insert a batch_dim                 # (1, 4, 84, 84)
+        next_state = np.expand_dims(next_state, 0)                             # (1, 4, 84, 84)
 
         self.buffer.append((state, action, reward, next_state, done))
 
     def sample(self, batch_size):
         state, action, reward, next_state, done = zip(*random.sample(self.buffer, batch_size))     # all are (32) -> tuple
-        return np.concatenate(state), action, reward, np.concatenate(next_state), done             # state -> (32, 1, 80, 80)
+        return np.concatenate(state), action, reward, np.concatenate(next_state), done             # state -> (32, 1, 84, 84)
 
     def __len__(self):
         return len(self.buffer)
@@ -94,13 +94,12 @@ class CnnDQN(nn.Module):
 
     def act(self, state, epsilon):
         """
-        state -> (4, 80, 80)
+        state -> (4, 84, 84)
         
         return action -> int
         """
         if random.random() > epsilon:
-            with torch.no_grad():
-                state = Variable(torch.FloatTensor(state).unsqueeze(0))        # (1, 4, 80, 80) -> numpy
+            state = Variable(torch.FloatTensor(state).unsqueeze(0))            # (1, 4, 84, 84) -> numpy
             q_value = self.forward(state)                                      # (1, 6)         -> torch.FloatTensor()
             action = q_value.max(1)[1].item()                                  # max returns  (item, index)
         else:
@@ -114,7 +113,7 @@ if __name__ == '__main__':
     env    = wrap_deepmind(env, frame_stack=True)
     env    = wrap_pytorch(env)
     
-    state = env.reset()  # (4, 80, 80)
+    state = env.reset()  # (4, 84, 84)
 
 
     # epsilon greedy exploration parameters
@@ -140,26 +139,25 @@ if __name__ == '__main__':
         current_model = current_model.cuda()
         target_model = target_model.cuda()
 
-    optimizer = optim.Adam(current_model.parameters(), lr=0.00001)
+    optimizer = optim.Adam(current_model.parameters(), lr=0.0001)
 
     replay_initial = 10000
     replay_buffer = ReplyBuffer(100000)
+
 
     
     # function for synchoronize current net with target net
     def update_target(current_model, target_model):
         target_model.load_state_dict(current_model.state_dict())
-        
+    
+    update_target(current_model, target_model)
         
     # compute temporal difference loss
     def compute_td_loss(batch_size):
         state, action, reward, next_state, done = replay_buffer.sample(batch_size)
 
         state = Variable(torch.FloatTensor(np.float32(state)))
-
-        with torch.no_grad():
-            next_state = Variable(torch.FloatTensor(np.float32(next_state)))
-
+        next_state = Variable(torch.FloatTensor(np.float32(next_state)))
         action = Variable(torch.LongTensor(action))
         reward = Variable(torch.FloatTensor(reward))
         done = Variable(torch.FloatTensor(done))
