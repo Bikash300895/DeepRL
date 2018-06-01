@@ -51,23 +51,34 @@ class ReplyBuffer(object):
         return len(self.buffer)
 
 
-class DQN(nn.Module):
-
+class DuelingDQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
-        super(DQN, self).__init__()
-        self.num_inputs = num_inputs
+        super(DuelingDQN, self).__init__()
         self.num_actions = num_actions
-
-        self.layers = nn.Sequential(
+        self.num_inputs = num_inputs
+        
+        self.feature = nn.Sequential(
             nn.Linear(num_inputs, 128),
-            nn.ReLU(),
+            nn.ReLU()
+        )
+        
+        self.advantage = nn.Sequential(
             nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, num_actions)
         )
-
+        
+        self.value = nn.Sequential(
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1)
+        )
+        
     def forward(self, x):
-        return self.layers(x)
+        x = self.feature(x)
+        advantage = self.advantage(x)
+        value     = self.value(x)
+        return value + advantage  - advantage.mean()
 
     def act(self, state, epsilon):
         if random.random() > epsilon:
@@ -101,8 +112,8 @@ if __name__ == '__main__':
     episode_reward = 0
 
     # define model
-    current_model = DQN(env.observation_space.shape[0], env.action_space.n)
-    target_model = DQN(env.observation_space.shape[0], env.action_space.n)
+    current_model = DuelingDQN(env.observation_space.shape[0], env.action_space.n)
+    target_model = DuelingDQN(env.observation_space.shape[0], env.action_space.n)
     if USE_CUDA:
         current_model = current_model.cuda()
         target_model = target_model.cuda()
@@ -128,11 +139,10 @@ if __name__ == '__main__':
         done = Variable(torch.FloatTensor(done))
 
         q_values = current_model(state)
-        next_q_values = current_model(next_state)
-        next_q_state_values = target_model(next_state)
+        next_q_values = target_model(next_state)
 
         q_value = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
-        next_q_value = next_q_state_values.gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1)).squeeze(1)
+        next_q_value = next_q_values.max(1)[0]
         expected_q_value = reward + gamma * next_q_value * (1 - done)
 
         loss = (q_value - Variable(expected_q_value.data)).pow(2).mean()

@@ -1,6 +1,5 @@
 import math
 import random
-import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -60,38 +59,44 @@ class ReplyBuffer(object):
         return len(self.buffer)
 
 
-class CnnDQN(nn.Module):
-
-    def __init__(self, input_shape, num_actions):
-        super(CnnDQN, self).__init__()
-
+class DuelingCnnDQN(nn.Module):
+    def __init__(self, input_shape, num_outputs):
+        super(DuelingCnnDQN, self).__init__()
+        
         self.input_shape = input_shape
-        self.num_actions = num_actions
-
+        self.num_actions = num_outputs
+        
         self.features = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=5, stride=4),
+            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
             nn.Conv2d(64, 64, kernel_size=3, stride=1),
             nn.ReLU()
         )
-
-        self.fc = nn.Sequential(
+        
+        self.advantage = nn.Sequential(
             nn.Linear(self.feature_size(), 512),
             nn.ReLU(),
-            nn.Linear(512, self.num_actions)
+            nn.Linear(512, num_outputs)
         )
-
+        
+        self.value = nn.Sequential(
+            nn.Linear(self.feature_size(), 512),
+            nn.ReLU(),
+            nn.Linear(512, 1)
+        )
+        
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.fc(x)
-        return x
-
+        advantage = self.advantage(x)
+        value     = self.value(x)
+        return value + advantage  - advantage.mean()
+    
     def feature_size(self):
         return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
-
+    
     def act(self, state, epsilon):
         """
         state -> (4, 84, 84)
@@ -119,11 +124,11 @@ if __name__ == '__main__':
     # epsilon greedy exploration parameters
     epsilon_start = 1.0
     epsilon_final = 0.01
-    epsilon_decay = 30000
+    epsilon_decay = 10000
     epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(
         -1. * frame_idx / epsilon_decay)
 
-    num_frames = 1000000
+    num_frames = 1500000
     batch_size = 32
     gamma = 0.99
 
@@ -132,8 +137,8 @@ if __name__ == '__main__':
     episode_reward = 0
 
     # define model
-    current_model = CnnDQN(env.observation_space.shape, env.action_space.n)
-    target_model = CnnDQN(env.observation_space.shape, env.action_space.n)
+    current_model = DuelingCnnDQN(env.observation_space.shape, env.action_space.n)
+    target_model = DuelingCnnDQN(env.observation_space.shape, env.action_space.n)
     
     if USE_CUDA:
         current_model = current_model.cuda()
@@ -163,11 +168,10 @@ if __name__ == '__main__':
         done = Variable(torch.FloatTensor(done))
 
         q_values = current_model(state)
-        next_q_values = current_model(next_state)
-        next_q_state_values = target_model(next_state)
+        next_q_values = target_model(next_state)
 
         q_value = q_values.gather(1, action.unsqueeze(1)).squeeze(1)
-        next_q_value = next_q_state_values.gather(1, torch.max(next_q_values, 1)[1].unsqueeze(1)).squeeze(1)
+        next_q_value = next_q_values.max(1)[0]
         expected_q_value = reward + gamma * next_q_value * (1 - done)
 
         loss = (q_value - Variable(expected_q_value.data)).pow(2).mean()
